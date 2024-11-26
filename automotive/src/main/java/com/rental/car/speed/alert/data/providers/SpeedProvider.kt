@@ -1,8 +1,11 @@
 package com.rental.car.speed.alert.data.providers
 
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import androidx.core.app.ActivityCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import kotlin.concurrent.fixedRateTimer
 
 /**
  * Provides speed data for vehicles.
@@ -11,25 +14,27 @@ import kotlin.concurrent.fixedRateTimer
  * It also simulates speed data for each vehicle using a timer.
  *
  */
-class SpeedProvider {
-    private val carSpeedData = mutableMapOf<String, MutableLiveData<Int>>()
+class SpeedProvider(private val context: Context) {
+    private val locationManager =
+        context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    private val speedLiveData = MutableLiveData<Float>()
 
-    fun getSpeedLiveData(carId: String): LiveData<Int> {
-        return carSpeedData.getOrPut(carId) {
-            MutableLiveData<Int>().also { liveData ->
-                simulateSpeedUpdates(carId, liveData)
+    fun getSpeedLiveData(): LiveData<Float> {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        )
+
+            locationManager.requestLocationUpdates(
+                LocationManager.GPS_PROVIDER,
+                1000,
+                1f
+            ) { location ->
+                val speed = location.speed * 3.6f // Convert m/s to km/h
+                speedLiveData.postValue(speed)
             }
-        }
-    }
 
-    private fun simulateSpeedUpdates(carId: String, liveData: MutableLiveData<Int>) {
-        fixedRateTimer(
-            name = "$carId-SpeedSimulation",
-            initialDelay = 0,
-            period = 2000
-        ) {
-            val randomSpeed = (0..120).random()
-            liveData.postValue(randomSpeed)
-        }
+        return speedLiveData
     }
 }

@@ -1,9 +1,11 @@
 package com.rental.car.speed.alert.presentation.viewmodels
 
-import androidx.lifecycle.Observer
-import com.rental.car.speed.alert.data.models.Rental
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
 import com.rental.car.speed.alert.data.models.SpeedAlert
 import com.rental.car.speed.alert.data.providers.SpeedProvider
+import com.rental.car.speed.alert.data.repositories.FirebaseRepository
 import com.rental.car.speed.alert.data.repositories.NotificationService
 
 /**
@@ -12,34 +14,27 @@ import com.rental.car.speed.alert.data.repositories.NotificationService
  * @param notificationService the NotificationInterface instance for sending notifications
  */
 class SpeedMonitorViewModel(
-    private val notificationService: NotificationService,
-    private val speedProvider: SpeedProvider
-) {
-    private val activeObservers = mutableMapOf<String, Observer<Int>>()
+    private val speedProvider: SpeedProvider,
+    private val firebaseRepository: FirebaseRepository,
+    private val notificationService: NotificationService
+) : ViewModel() {
 
-    fun startMonitoring(rentals: List<Rental>) {
-        rentals.forEach { rental ->
-            val speedLiveData = speedProvider.getSpeedLiveData(rental.carId)
-            val observer = Observer<Int> { currentSpeed ->
-                if (currentSpeed > rental.maxSpeed) {
-                    val alert = SpeedAlert(
-                        carId = rental.carId,
-                        renterId = rental.renterId,
-                        currentSpeed = currentSpeed,
-                        maxSpeed = rental.maxSpeed
-                    )
+    private val _alerts = MutableLiveData<SpeedAlert>()
+    val alerts: LiveData<SpeedAlert> = _alerts
+
+    /**
+     * Monitor speed for a specific car and renter.
+     */
+    fun monitorSpeed(carId: String, renterId: String) {
+        val speedLimitLiveData = firebaseRepository.getSpeedLimit(carId)
+
+        speedProvider.getSpeedLiveData().observeForever { currentSpeed ->
+            speedLimitLiveData.observeForever { maxSpeed ->
+                if (currentSpeed > maxSpeed) {
+                    val alert = SpeedAlert(carId, currentSpeed.toString(), maxSpeed, renterId)
+                    _alerts.postValue(alert)
                     notificationService.sendNotification(alert)
                 }
-            }
-            speedLiveData.observeForever(observer)
-            activeObservers[rental.carId] = observer
-        }
-    }
-
-    fun stopMonitoring(rentals: List<Rental>) {
-        rentals.forEach { rental ->
-            activeObservers.remove(rental.carId)?.let {
-                speedProvider.getSpeedLiveData(rental.carId).removeObserver(it)
             }
         }
     }

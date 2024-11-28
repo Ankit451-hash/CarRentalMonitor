@@ -4,9 +4,10 @@ package com.rental.car.speed.alert.data.models
  * Represents a speed alert triggered when a renter exceeds the maximum allowed speed.
  *
  * @property carId the unique identifier of the car that triggered the alert
- * @property renterId the unique identifier of the renter who triggered the alert
  * @property currentSpeed the current speed of the car that triggered the alert
  * @property maxSpeed the maximum allowed speed for the rental
+ *
+ * @author [Ankit Pandey]
  */
 
 data class SpeedAlert(
@@ -16,14 +17,9 @@ data class SpeedAlert(
     val carId: String,
 
     /**
-     * The unique identifier of the renter who triggered the alert.
-     */
-    val renterId: String,
-
-    /**
      * The current speed of the car that triggered the alert.
      */
-    val currentSpeed: Int,
+    val currentSpeed: Float,
 
     /**
      * The maximum allowed speed for the rental.

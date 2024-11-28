@@ -1,0 +1,18 @@
+{
+  "rentals": [
+    {
+      "carId": "CAR123",
+      "carName": "Polestar1",
+      "renterId": "R123",
+      "renterName": "John Doe",
+      "maxSpeedLimit": 80
+    },
+    {
+      "carId": "CAR456",
+      "carName": "Polestar2",
+      "renterId": "R456",
+      "renterName": "Jane Smith",
+      "maxSpeedLimit": 90
+    }
+  ]
+}

@@ -52,6 +52,7 @@ dependencies {
     implementation(libs.androidx.datastore.core.android)
     implementation(libs.firebase.functions.ktx)
     implementation(libs.androidx.activity)
+    implementation(libs.androidx.lifecycle.service)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -60,6 +61,11 @@ dependencies {
     implementation(libs.firebase.messaging.ktx)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.database)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+
+    //Required for JSON
+    implementation(libs.gson)
 
     // Required dependencies for junit testing
     testImplementation(libs.mockito.core)
